@@ -80,8 +80,8 @@ def process(mlist, msg, msgdata):
     omask = os.umask(0o007)
     try:
         with open(mboxfile, 'a+b') as mboxfp:
-            mbox = Mailbox(mboxfp.name)
-            mbox.AppendMessage(msg)
+            with Mailbox(mboxfp.name) as mbox:
+                mbox.AppendMessage(msg)
             # Calculate the current size of the accumulation file.  This will not tell
             # us exactly how big the MIME, rfc1153, or any other generated digest
             # message will be, but it's the most easily available metric to decide
@@ -155,6 +155,13 @@ def send_digests(mlist, mboxfp):
 
 def send_i18n_digests(mlist, mboxfp):
     mbox = Mailbox(mboxfp)
+    try:
+        _send_i18n_digests(mlist, mbox)
+    finally:
+        mbox.close()
+
+
+def _send_i18n_digests(mlist, mbox):
     # Prepare common information (first lang/charset)
     lang = mlist.preferred_language
     lcset = Utils.GetCharSet(lang)
