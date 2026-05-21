@@ -80,8 +80,11 @@ def process(mlist, msg, msgdata):
     omask = os.umask(0o007)
     try:
         with open(mboxfile, 'a+b') as mboxfp:
-            with Mailbox(mboxfp.name) as mbox:
+            mbox = Mailbox(mboxfp.name)
+            try:
                 mbox.AppendMessage(msg)
+            finally:
+                mbox.close()
             # Calculate the current size of the accumulation file.  This will not tell
             # us exactly how big the MIME, rfc1153, or any other generated digest
             # message will be, but it's the most easily available metric to decide
